@@ -23,7 +23,7 @@ my %module_build_args = (
     "Fletcher T. Penney <owner\@fletcherpenney.net>"
   ],
   "dist_name" => "WebService-Simplenote",
-  "dist_version" => "0.1.0",
+  "dist_version" => "0.1.1",
   "license" => "gpl",
   "module_name" => "WebService::Simplenote",
   "recommends" => {},
@@ -31,6 +31,7 @@ my %module_build_args = (
   "requires" => {
     "DateTime" => 0,
     "JSON" => 0,
+    "JSON::Any" => 0,
     "LWP::UserAgent" => 0,
     "Log::Any" => 0,
     "MIME::Base64" => 0,

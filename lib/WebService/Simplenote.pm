@@ -5,7 +5,7 @@ package WebService::Simplenote;
 # TODO: cache authentication token between runs, use LWP cookie_jar for auth token
 # TODO: Net::HTTP::Spore?
 
-our $VERSION = '0.1.0';
+our $VERSION = '0.1.1';
 
 use v5.10;
 use Moose;
@@ -217,7 +217,7 @@ WebService::Simplenote - Note-taking through simplenoteapp.com
 
 =head1 VERSION
 
-version 0.1.0
+version 0.1.1
 
 =head1 SYNOPSIS
 

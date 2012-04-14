@@ -29,6 +29,7 @@
          "requires" : {
             "DateTime" : "0",
             "JSON" : "0",
+            "JSON::Any" : "0",
             "LWP::UserAgent" : "0",
             "Log::Any" : "0",
             "MIME::Base64" : "0",
@@ -64,13 +65,14 @@
          "web" : "https://github.com/ioanrogers/WebService-Simplenote"
       }
    },
-   "version" : "0.1.0",
+   "version" : "0.1.1",
    "x_BuiltWith" : {
       "modules" : {
          "DateTime" : "0.74",
          "File::Find" : "1.19",
          "File::Temp" : "0.22",
          "JSON" : "2.53",
+         "JSON::Any" : "1.29",
          "LWP::UserAgent" : "6.04",
          "Log::Any" : "0.14",
          "MIME::Base64" : "3.13",

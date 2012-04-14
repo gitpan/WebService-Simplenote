@@ -1,6 +1,6 @@
 package WebService::Simplenote::Note;
 {
-    $WebService::Simplenote::Note::VERSION = '0.1.0';
+    $WebService::Simplenote::Note::VERSION = '0.1.1';
 }
 
 # ABSTRACT: represents an individual note
@@ -146,7 +146,7 @@ WebService::Simplenote::Note - represents an individual note
 
 =head1 VERSION
 
-version 0.1.0
+version 0.1.1
 
 =head1 SYNOPSIS
 

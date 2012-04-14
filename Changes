@@ -1,6 +1,6 @@
 Changelog for WebService-Simplenote
 
-0.1.0 2012-04-14T02:05:17
+0.1.1 2012-04-14T20:31:25
  [Fletcher T. Penney <fletcher@Ivory-2.local>]
  - Don't download modified notes that are flagged as deleted in index (I
    hope!)
@@ -192,6 +192,8 @@ Changelog for WebService-Simplenote
 
 
  [Ioan Rogers <ioanr@cpan.org>]
+ - Explicitly list JSON::Any as a prereq (via MooseX::Storage)
+
  - Tidied
 
  - Use array traits for tags
