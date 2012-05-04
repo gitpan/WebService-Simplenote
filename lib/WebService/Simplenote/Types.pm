@@ -1,6 +1,6 @@
 package WebService::Simplenote::Types;
 {
-    $WebService::Simplenote::Types::VERSION = '0.1.1';
+    $WebService::Simplenote::Types::VERSION = '0.1.2';
 }
 
 # ABSTRACT Custom type library
@@ -23,7 +23,7 @@ WebService::Simplenote::Types
 
 =head1 VERSION
 
-version 0.1.1
+version 0.1.2
 
 =head1 AUTHORS
 

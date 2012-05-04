@@ -4,7 +4,7 @@ WebService::Simplenote - Note-taking through simplenoteapp.com
 
 # VERSION
 
-version 0.1.1
+version 0.1.2
 
 # SYNOPSIS
 
@@ -35,8 +35,8 @@ version 0.1.1
 
 # DESCRIPTION
 
-This module proves API access to the cloud-based note software at
-[https://simplenoteapp.com](http://search.cpan.org/perldoc?Simplenote).
+This module proves v2.1.5 API access to the cloud-based note software at
+[Simplenote](https://simplenoteapp.com).
 
 # ERRORS
 

@@ -1,6 +1,6 @@
 package WebService::Simplenote::Note;
 {
-    $WebService::Simplenote::Note::VERSION = '0.1.1';
+    $WebService::Simplenote::Note::VERSION = '0.1.2';
 }
 
 # ABSTRACT: represents an individual note
@@ -146,7 +146,7 @@ WebService::Simplenote::Note - represents an individual note
 
 =head1 VERSION
 
-version 0.1.1
+version 0.1.2
 
 =head1 SYNOPSIS
 
@@ -165,7 +165,7 @@ version 0.1.1
 =head1 DESCRIPTION
 
 This class represents a note suitable for use with Simplenote. You should read the 
-L<http://simplenoteapp.com/api/|Simplenote API> docs for full details
+L<Simplenote API|http://simplenoteapp.com/api/> docs for full details
 
 =head1 METHODS
 

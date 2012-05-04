@@ -23,7 +23,7 @@ my %module_build_args = (
     "Fletcher T. Penney <owner\@fletcherpenney.net>"
   ],
   "dist_name" => "WebService-Simplenote",
-  "dist_version" => "0.1.1",
+  "dist_version" => "0.1.2",
   "license" => "gpl",
   "module_name" => "WebService::Simplenote",
   "recommends" => {},
@@ -42,6 +42,7 @@ my %module_build_args = (
     "MooseX::Types::Path::Class" => 0,
     "Try::Tiny" => 0,
     "namespace::autoclean" => 0,
+    "open" => 0,
     "perl" => "v5.10.0"
   },
   "script_files" => []

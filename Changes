@@ -1,6 +1,6 @@
 Changelog for WebService-Simplenote
 
-0.1.1 2012-04-14T20:31:25
+0.1.2 2012-05-04T08:38:38
  [Fletcher T. Penney <fletcher@Ivory-2.local>]
  - Don't download modified notes that are flagged as deleted in index (I
    hope!)
@@ -192,6 +192,16 @@ Changelog for WebService-Simplenote
 
 
  [Ioan Rogers <ioanr@cpan.org>]
+ - Bump version
+
+ - Support paginated index
+
+ - Don't track timetracker config
+
+ - Specify the simplenote api version used
+
+ - Fixed pod formatting
+
  - Explicitly list JSON::Any as a prereq (via MooseX::Storage)
 
  - Tidied
