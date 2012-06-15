@@ -23,7 +23,7 @@ my %module_build_args = (
     "Fletcher T. Penney <owner\@fletcherpenney.net>"
   ],
   "dist_name" => "WebService-Simplenote",
-  "dist_version" => "0.2.0",
+  "dist_version" => "0.2.1",
   "license" => "gpl",
   "module_name" => "WebService::Simplenote",
   "recommends" => {},

@@ -1,6 +1,6 @@
 package WebService::Simplenote::Note::Meta::Types;
 {
-    $WebService::Simplenote::Note::Meta::Types::VERSION = '0.2.0';
+  $WebService::Simplenote::Note::Meta::Types::VERSION = '0.2.1';
 }
 
 # ABSTRACT Custom type library for Notes
@@ -12,7 +12,6 @@ enum 'SystemTags', [qw/pinned unread markdown list/];
 no Moose::Util::TypeConstraints;
 
 __END__
-
 =pod
 
 =for :stopwords Ioan Rogers Fletcher T. Penney github
@@ -23,7 +22,7 @@ WebService::Simplenote::Note::Meta::Types
 
 =head1 VERSION
 
-version 0.2.0
+version 0.2.1
 
 =head1 AUTHORS
 
@@ -58,3 +57,4 @@ The development version is on github at L<http://github.com/ioanrogers/WebServic
 and may be cloned from L<git://github.com/ioanrogers/WebService-Simplenote.git>
 
 =cut
+

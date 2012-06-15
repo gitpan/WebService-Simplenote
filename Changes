@@ -1,6 +1,11 @@
 Changelog for WebService-Simplenote
 
-0.2.0 2012-06-15T03:00:39
+0.2.1 2012-06-15T03:43:48
+ [Ioan Rogers <ioanr@cpan.org>]
+ - Perltidy broke the methods!
+
+
+v0.2.0 2012-06-15T03:00:30
  [Ioan Rogers <ioanr@cpan.org>]
  - Releasing v0.2.0
 

@@ -67,7 +67,7 @@
          "web" : "https://github.com/ioanrogers/WebService-Simplenote"
       }
    },
-   "version" : "0.2.0",
+   "version" : "0.2.1",
    "x_BuiltWith" : {
       "modules" : {
          "DateTime" : "0.75",

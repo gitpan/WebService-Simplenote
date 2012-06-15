@@ -1,6 +1,6 @@
 package WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised;
 {
-    $WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised::VERSION = '0.2.0';
+  $WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised::VERSION = '0.2.1';
 }
 
 # ABSTRACT: Mark note attributes as not to be serialised
@@ -8,12 +8,11 @@ package WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised;
 use v5.10;
 use Moose::Role;
 
-Moose::Util::meta_attribute_alias( 'NotSerialised' );
+Moose::Util::meta_attribute_alias('NotSerialised');
 
 1;
 
 __END__
-
 =pod
 
 =for :stopwords Ioan Rogers Fletcher T. Penney github
@@ -24,7 +23,7 @@ WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised - Mark note 
 
 =head1 VERSION
 
-version 0.2.0
+version 0.2.1
 
 =head1 AUTHORS
 
@@ -59,3 +58,4 @@ The development version is on github at L<http://github.com/ioanrogers/WebServic
 and may be cloned from L<git://github.com/ioanrogers/WebService-Simplenote.git>
 
 =cut
+

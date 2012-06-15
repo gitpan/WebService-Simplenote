@@ -1,7 +1,4 @@
 package WebService::Simplenote::Note;
-{
-  $WebService::Simplenote::Note::VERSION = '0.2.1';
-}
 
 # ABSTRACT: represents an individual note
 
@@ -21,11 +18,12 @@ use namespace::autoclean;
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
-
-    if (@_ == 1 && !ref $_[0]) {
+    
+    if ( @_ == 1 && !ref $_[0] ) {
         my $note = JSON->new->utf8->decode($_[0]);
-        return $class->$orig($note);
-    } else {
+        return $class->$orig( $note );
+    }
+    else {
         return $class->$orig(@_);
     }
 };
@@ -46,7 +44,7 @@ has key => (
 );
 
 # set by server
-has ['sharekey', 'publishkey'] => (
+has [ 'sharekey', 'publishkey' ] => (
     is  => 'ro',
     isa => 'Str',
 );
@@ -64,14 +62,14 @@ has deleted => (
 );
 
 # XXX should default to DateTime->now?
-has ['createdate', 'modifydate'] => (
+has [ 'createdate', 'modifydate' ] => (
     is     => 'rw',
     isa    => DateTime,
     coerce => 1,
 );
 
 # set by server
-has ['syncnum', 'version', 'minversion'] => (
+has [ 'syncnum', 'version', 'minversion' ] => (
     is  => 'rw',
     isa => 'Int',
 );
@@ -95,9 +93,9 @@ has systemtags => (
     isa     => 'ArrayRef[SystemTags]',
     default => sub { [] },
     handles => {
-        set_markdown => [push  => 'markdown'],
-        is_markdown  => [first => sub {/^markdown/}],
-        set_pinned   => [push  => 'pinned'],
+        set_markdown => [ push  => 'markdown' ],
+        is_markdown  => [ first => sub { /^markdown/ } ],
+        set_pinned   => [ push  => 'pinned' ],
         join_systags   => 'join',
         has_systags    => 'count',
         has_no_systags => 'is_empty',
@@ -123,7 +121,7 @@ method serialise {
 
 method TO_JSON {
     my %hash;
-    for my $attr ($self->meta->get_all_attributes) {
+    for my $attr ( $self->meta->get_all_attributes ) {
         next if $attr->does('NotSerialised');
         my $reader = $attr->get_read_method;
         if (defined $self->$reader) {
@@ -135,11 +133,11 @@ method TO_JSON {
     if (exists $hash{createdate}) {
         $hash{createdate} = $self->createdate->epoch;
     }
-
+    
     if (exists $hash{modifydate}) {
         $hash{modifydate} = $self->modifydate->epoch;
     }
-
+    
     return \%hash;
 }
 
@@ -163,7 +161,7 @@ sub _get_title_from_content {
     $title =~ s/^\s+//;
     $title =~ s/\s+$//;
 
-    $self->title($title);
+    $self->title( $title );
 
     return 1;
 }
@@ -171,20 +169,6 @@ sub _get_title_from_content {
 __PACKAGE__->meta->make_immutable;
 
 1;
-
-
-__END__
-=pod
-
-=for :stopwords Ioan Rogers Fletcher T. Penney github
-
-=head1 NAME
-
-WebService::Simplenote::Note - represents an individual note
-
-=head1 VERSION
-
-version 0.2.1
 
 =head1 SYNOPSIS
 
@@ -262,38 +246,3 @@ Arrayref[Str]; special tags.
 =item content
 
 The body of the note
-
-=head1 AUTHORS
-
-=over 4
-
-=item *
-
-Ioan Rogers <ioanr@cpan.org>
-
-=item *
-
-Fletcher T. Penney <owner@fletcherpenney.net>
-
-=back
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is Copyright (c) 2012 by Ioan Rogers.
-
-This is free software, licensed under:
-
-  The GNU General Public License, Version 2, June 1991
-
-=head1 BUGS AND LIMITATIONS
-
-You can make new bug reports, and view existing ones, through the
-web interface at L<https://github.com/ioanrogers/WebService-Simplenote/issues>.
-
-=head1 SOURCE
-
-The development version is on github at L<http://github.com/ioanrogers/WebService-Simplenote>
-and may be cloned from L<git://github.com/ioanrogers/WebService-Simplenote.git>
-
-=cut
-
