@@ -9,7 +9,8 @@ dist.ini
 eg/simplenote.pl
 lib/WebService/Simplenote.pm
 lib/WebService/Simplenote/Note.pm
-lib/WebService/Simplenote/Types.pm
+lib/WebService/Simplenote/Note/Meta/Attribute/Trait/NotSerialised.pm
+lib/WebService/Simplenote/Note/Meta/Types.pm
 t/00-compile.t
 t/1_simplenote.t
 t/2_note.t

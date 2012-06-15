@@ -1,15 +1,16 @@
-package WebService::Simplenote::Types;
+package WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised;
 {
-    $WebService::Simplenote::Types::VERSION = '0.1.2';
+    $WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised::VERSION = '0.2.0';
 }
 
-# ABSTRACT Custom type library
+# ABSTRACT: Mark note attributes as not to be serialised
 
-use Moose::Util::TypeConstraints;
+use v5.10;
+use Moose::Role;
 
-enum 'SystemTags', [qw/pinned unread markdown list/];
+Moose::Util::meta_attribute_alias( 'NotSerialised' );
 
-no Moose::Util::TypeConstraints;
+1;
 
 __END__
 
@@ -19,11 +20,11 @@ __END__
 
 =head1 NAME
 
-WebService::Simplenote::Types
+WebService::Simplenote::Note::Meta::Attribute::Trait::NotSerialised - Mark note attributes as not to be serialised
 
 =head1 VERSION
 
-version 0.1.2
+version 0.2.0
 
 =head1 AUTHORS
 

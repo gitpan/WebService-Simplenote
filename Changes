@@ -1,6 +1,47 @@
 Changelog for WebService-Simplenote
 
-0.1.2 2012-05-04T08:38:38
+0.2.0 2012-06-15T03:00:39
+ [Ioan Rogers <ioanr@cpan.org>]
+ - Releasing v0.2.0
+
+ - Use cookies for auth token, closes #3
+
+ - Support http proxy from environment [closes github #2]
+
+ - Merge branch 'master' of github.com:ioanrogers/WebService-Simplenote
+
+ - Move Method::Signatures use to work around github
+   schwern/method-signatures#41
+
+ - Move Method::Signatures use to work around
+   github:schwern/method-signatures#41
+
+ - Using Method::Signatures
+
+ - Using JSON directly, no longer depending on MooseX::Storage.
+
+ - Fix changelog output
+
+
+v0.1.2 2012-05-04T08:37:45
+ [Ioan Rogers <ioanr@cpan.org>]
+ - Bump version
+
+ - Support paginated index
+
+ - Don't track timetracker config
+
+ - Specify the simplenote api version used
+
+ - Fixed pod formatting
+
+
+v0.1.1 2012-04-14T20:31:14
+ [Ioan Rogers <ioanr@cpan.org>]
+ - Explicitly list JSON::Any as a prereq (via MooseX::Storage)
+
+
+v0.1.0 2012-04-14T01:41:23
  [Fletcher T. Penney <fletcher@Ivory-2.local>]
  - Don't download modified notes that are flagged as deleted in index (I
    hope!)
@@ -192,18 +233,6 @@ Changelog for WebService-Simplenote
 
 
  [Ioan Rogers <ioanr@cpan.org>]
- - Bump version
-
- - Support paginated index
-
- - Don't track timetracker config
-
- - Specify the simplenote api version used
-
- - Fixed pod formatting
-
- - Explicitly list JSON::Any as a prereq (via MooseX::Storage)
-
  - Tidied
 
  - Use array traits for tags

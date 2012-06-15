@@ -2,10 +2,9 @@ package WebService::Simplenote;
 
 # ABSTRACT: Note-taking through simplenoteapp.com
 
-# TODO: cache authentication token between runs, use LWP cookie_jar for auth token
 # TODO: Net::HTTP::Spore?
 
-our $VERSION = '0.1.2';
+our $VERSION = '0.2.0';
 
 use v5.10;
 use open qw(:std :utf8);
@@ -13,11 +12,13 @@ use Moose;
 use MooseX::Types::Path::Class;
 use JSON;
 use LWP::UserAgent;
+use HTTP::Cookies;
 use Log::Any qw//;
 use DateTime;
 use MIME::Base64 qw//;
 use Try::Tiny;
 use WebService::Simplenote::Note;
+use Method::Signatures;
 use namespace::autoclean;
 
 has [ 'email', 'password' ] => (
@@ -26,12 +27,10 @@ has [ 'email', 'password' ] => (
     required => 1,
 );
 
-has token => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-    lazy     => 1,
-    builder  => '_build_token',
+has _token => (
+    is        => 'rw',
+    isa       => 'Str',
+    predicate => 'has_logged_in',
 );
 
 has no_server_updates => (
@@ -64,21 +63,30 @@ has _uri => (
 );
 
 has _ua => (
-    is      => 'rw',
-    isa     => 'LWP::UserAgent',
-    default => sub {
-        my $headers = HTTP::Headers->new( Content_Type => 'application/json', );
-        return LWP::UserAgent->new(
-            agent           => "WebService::Simplenote/$VERSION",
-            default_headers => $headers,
-        );
-    },
+    is         => 'ro',
+    isa        => 'LWP::UserAgent',
+    required   => 1,
+    lazy_build => 1,
 );
 
-# Connect to server and get a authentication token
-sub _build_token {
-    my $self = shift;
+method _build__ua {
 
+    my $headers = HTTP::Headers->new( Content_Type => 'application/json', );
+
+    # XXX is it worth saving cookie?? How is password more valuable than auth token?
+    # logging in is only a fraction of a second!
+    my $ua = LWP::UserAgent->new(
+        agent           => "WebService::Simplenote/$VERSION",
+        default_headers => $headers,
+        env_proxy       => 1,
+        cookie_jar      => HTTP::Cookies->new,
+    );
+
+    return $ua;
+}
+
+# Connect to server and get a authentication token
+method _login {
     my $content = MIME::Base64::encode_base64( sprintf 'email=%s&password=%s', $self->email, $self->password );
 
     $self->logger->debug( 'Network: getting auth token' );
@@ -90,163 +98,175 @@ sub _build_token {
         die 'Error logging into Simplenote server: ' . $response->status_line . "\n";
     }
 
-    return $response->content;
-}
-
-sub _get_remote_index_page {
-    my ( $self, $mark ) = @_;
-
-    my $notes;
-
-    my $req_uri = sprintf '%s/index?auth=%s&email=%s&length=%i',
-      $self->_uri, $self->token, $self->email, $self->page_size;
-
-    if ( defined $mark ) {
-        $self->logger->debug( 'Network: retrieving next page' );
-        $req_uri .= '&mark=' . $mark;
-    }
-
-    my $response = $self->_ua->get( $req_uri );
-    my $index    = decode_json( $response->content );
-
-    if ( $index->{count} > 0 ) {
-        $self->logger->debugf( 'Network: Index returned [%s] notes', $index->{count} );
-
-        # iterate through notes in index and load into hash
-        foreach my $i ( @{ $index->{data} } ) {
-            $notes->{ $i->{key} } = WebService::Simplenote::Note->new( $i );
-        }
-
-    } elsif ( $index->{count} == 0 && !exists $index->{mark} ) {
-        $self->logger->debugf( 'Network: No more pages to retrieve' );
-    } elsif ( $index->{count} == 0 ) {
-        $self->logger->debugf( 'Network: No notes found' );
-    }
-
-    if ( exists $index->{mark} ) {
-        return ( $notes, $index->{mark} );
-    }
-
-    return $notes;
-}
-
-# Get list of notes from simplenote server
-# TODO since, mark, length options
-sub get_remote_index {
-    my $self = shift;
-
-    $self->logger->debug( 'Network: getting note index' );
-
-    my ( $notes, $mark ) = $self->_get_remote_index_page;
-
-    while ( defined $mark ) {
-        my $next_page;
-        ( $next_page, $mark ) = $self->_get_remote_index_page( $mark );
-        @$notes{ keys %$next_page } = values %$next_page;
-    }
-
-    $self->logger->infof( 'Network: found %i remote notes', scalar keys %$notes );
-    return $notes;
-}
-
-# Given a local file, upload it as a note at simplenote web server
-sub put_note {
-    my ( $self, $note ) = @_;
-
-    if ( $self->no_server_updates ) {
-        $self->logger->warn( 'Sending notes to the server is disabled' );
-        return;
-    }
-
-    my $req_uri = sprintf '%s/data', $self->_uri;
-
-    if ( defined $note->key ) {
-        $self->logger->infof( '[%s] Updating existing note', $note->key );
-        $req_uri .= '/' . $note->key,;
-    } else {
-        $self->logger->debug( 'Uploading new note' );
-    }
-
-    $req_uri .= sprintf '?auth=%s&email=%s', $self->token, $self->email;
-    $self->logger->debug( "Network: POST to [$req_uri]" );
-
-    my $content = $note->freeze;
-
-    my $response = $self->_ua->post( $req_uri, Content => $content );
-
-    if ( !$response->is_success ) {
-        $self->logger->errorf( 'Failed uploading note: %s', $response->status_line );
-        return;
-    }
-
-    my $note_tmp = WebService::Simplenote::Note->thaw( $response->content );
-
-    # a brand new note will have a key generated remotely
-    if ( !defined $note->key ) {
-        return $note_tmp->key;
-    }
-
-    #TODO better return values
-    return;
-}
-
-# Save local copy of note from Simplenote server
-sub get_note {
-    my ( $self, $key ) = @_;
-
-    $self->logger->infof( 'Retrieving note [%s]', $key );
-
-    # TODO are there any other encoding options?
-    my $req_uri = sprintf '%s/data/%s?auth=%s&email=%s', $self->_uri, $key, $self->token, $self->email;
-    my $response = $self->_ua->get( $req_uri );
-
-    if ( !$response->is_success ) {
-        $self->logger->errorf( '[%s] could not be retrieved: %s', $key, $response->status_line );
-        return;
-    }
-
-    my $note = WebService::Simplenote::Note->thaw( $response->content );
-
-    return $note;
-}
-
-# Delete specified note from Simplenote server
-sub delete_note {
-    my ( $self, $note ) = @_;
-
-    if ( !$note->isa( 'WebService::Simplenote::Note' ) ) {
-        $self->logger->error( 'Passed $note is not a WebService::Simplenote::Note' );
-        return;
-    }
-
-    if ( $self->no_server_updates ) {
-        $self->logger->warnf( '[%s] Attempted to delete note when "no_server_updates" is set', $note->key );
-        return;
-    }
-
-    if ( !$note->deleted ) {
-        $self->logger->warnf( '[%s] Attempted to delete note which was not marked as trash', $note->key );
-        return;
-    }
-
-    $self->logger->infof( '[%s] Deleting from trash', $note->key );
-
-    my $req_uri = sprintf '%s/data/%s?auth=%s&email=%s', $self->_uri, $note->key, $self->token, $self->email;
-
-    my $response = $self->_ua->delete( $req_uri );
-
-    if ( !$response->is_success ) {
-        $self->logger->errorf( '[%s] Failed to delete note from trash: %s', $note->key, $response->status_line );
-        $self->logger->debug( "Uri: [$req_uri]" );
-        return;
-    }
-
+    $self->_token( $response->content );
     return 1;
 }
 
-__PACKAGE__->meta->make_immutable;
+method _build_req_uri( Str $path, HashRef $options
+    ? ) {
+    my $req_uri = sprintf '%s/%s', $self->_uri, $path;
 
-1;
+      if ( !$self->has_logged_in ) {
+        $self->_login;
+    }
+
+    return $req_uri if !defined $options;
+
+    $req_uri .= '?';
+      while ( my ( $option, $value ) = each %$options ) {
+        $req_uri .= "&$option=$value";
+    }
+
+    return $req_uri;
+    }
+
+  method _get_remote_index_page( Str $mark
+          ? ) {
+          my $notes;
+
+            my $req_uri = $self->_build_req_uri( 'index', { length => $self->page_size } );
+
+            if ( defined $mark ) {
+              $self->logger->debug( 'Network: retrieving next page' );
+              $req_uri .= '&mark=' . $mark;
+          }
+
+          $self->logger->debug( 'Network: retrieving ' . $req_uri );
+
+            my $response = $self->_ua->get( $req_uri );
+            if ( !$response->is_success ) {
+              $self->logger->error( 'Network: ' . $response->status_line );
+              return;
+          }
+
+          my $index = decode_json( $response->content );
+
+            if ( $index->{count} > 0 ) {
+              $self->logger->debugf( 'Network: Index returned [%s] notes', $index->{count} );
+
+              # iterate through notes in index and load into hash
+              foreach my $i ( @{ $index->{data} } ) {
+                  $notes->{ $i->{key} } = WebService::Simplenote::Note->new( $i );
+              }
+
+          } elsif ( $index->{count} == 0 && !exists $index->{mark} ) {
+              $self->logger->debugf( 'Network: No more pages to retrieve' );
+          } elsif ( $index->{count} == 0 ) {
+              $self->logger->debugf( 'Network: No notes found' );
+          }
+
+          if ( exists $index->{mark} ) {
+              return ( $notes, $index->{mark} );
+          }
+
+          return $notes;
+          }
+
+      # Get list of notes from simplenote server
+      # TODO since, length options
+      method get_remote_index {
+          $self->logger->debug( 'Network: getting note index' );
+
+          my ( $notes, $mark ) = $self->_get_remote_index_page;
+
+          while ( defined $mark ) {
+              my $next_page;
+              ( $next_page, $mark ) = $self->_get_remote_index_page( $mark );
+              @$notes{ keys %$next_page } = values %$next_page;
+          }
+
+          $self->logger->infof( 'Network: found %i remote notes', scalar keys %$notes );
+          return $notes;
+    }
+
+    # Given a local file, upload it as a note at simplenote web server
+    method put_note( WebService::Simplenote::Note $note) {
+
+          if ( $self->no_server_updates ) {
+              $self->logger->warn( 'Sending notes to the server is disabled' );
+              return;
+          }
+
+          my $req_uri = $self->_build_req_uri( 'data' );
+
+            if ( defined $note->key ) {
+              $self->logger->infof( '[%s] Updating existing note', $note->key );
+              $req_uri .= '/' . $note->key,;
+          } else {
+              $self->logger->debug( 'Uploading new note' );
+          }
+
+          $self->logger->debug( "Network: POST to [$req_uri]" );
+
+            my $content = $note->serialise;
+
+            my $response = $self->_ua->post( $req_uri, Content => $content );
+
+            if ( !$response->is_success ) {
+              $self->logger->errorf( 'Failed uploading note: %s', $response->status_line );
+              return;
+          }
+
+          my $note_tmp = WebService::Simplenote::Note->new( $response->content );
+
+            # a brand new note will have a key generated remotely
+            if ( !defined $note->key ) {
+              return $note_tmp->key;
+          }
+
+          #TODO better return values
+          return;
+      }
+
+      # Save local copy of note from Simplenote server
+      method get_note( Str $key) {
+          $self->logger->infof( 'Retrieving note [%s]', $key );
+
+            # TODO are there any other encoding options?
+            my $req_uri = $self->_build_req_uri( "data/$key" );
+            $self->logger->debug( "Network: GETting [$req_uri]" );
+            my $response = $self->_ua->get( $req_uri );
+
+            if ( !$response->is_success ) {
+              $self->logger->errorf( '[%s] could not be retrieved: %s', $key, $response->status_line );
+              return;
+          }
+
+          my $note = WebService::Simplenote::Note->new( $response->content );
+
+            return $note;
+      }
+
+      # Delete specified note from Simplenote server
+      method delete_note( WebService::Simplenote::Note $note) {
+
+          if ( $self->no_server_updates ) {
+              $self->logger->warnf( '[%s] Attempted to delete note when "no_server_updates" is set', $note->key );
+              return;
+          }
+
+          if ( !$note->deleted ) {
+              $self->logger->warnf( '[%s] Attempted to delete note which was not marked as trash', $note->key );
+              return;
+          }
+
+          $self->logger->infof( '[%s] Deleting from trash', $note->key );
+            my $req_uri = $self->_build_req_uri( 'data/' . $note->key );
+            $self->logger->debug( "Network: DELETE on [$req_uri]" );
+            my $response = $self->_ua->delete( $req_uri );
+
+            if ( !$response->is_success ) {
+              $self->logger->errorf( '[%s] Failed to delete note from trash: %s', $note->key, $response->status_line );
+              $self->logger->debug( "Uri: [$req_uri]" );
+              return;
+          }
+
+          return 1;
+      }
+
+      __PACKAGE__->meta->make_immutable;
+
+      1;
 
 __END__
 
@@ -260,7 +280,7 @@ WebService::Simplenote - Note-taking through simplenoteapp.com
 
 =head1 VERSION
 
-version 0.1.2
+version 0.2.0
 
 =head1 SYNOPSIS
 
